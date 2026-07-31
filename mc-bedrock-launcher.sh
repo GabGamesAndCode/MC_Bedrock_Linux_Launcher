@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Nom du script : mc-bedrock-launcher.sh
-# Description : Lanceur intelligent pour BedrockOnLinux (Gère l'installation, les MAJ, le verrou anti-double-clic et le crash GPU)
+# Description : Lanceur intelligent pour BedrockOnLinux avec nettoyage complet des verrous GPU
 
 # --- 0. Auto-mise à jour si le projet a été cloné via Git ---
 if [ -d ".git" ]; then
@@ -14,21 +14,16 @@ LOCK_FILE="/tmp/mc_bedrock_launcher.lock"
 
 # --- 1. Empêcher les instances multiples (Anti-double clic) ---
 if [ -e "$LOCK_FILE" ]; then
-  # Vérifie si le processus inscrit dans le lock tourne toujours
   OLD_PID=$(cat "$LOCK_FILE")
   if ps -p "$OLD_PID" > /dev/null 2>&1; then
     echo "Erreur : Une instance de BedrockOnLinux Launcher est déjà en cours d'exécution !"
     exit 1
   else
-    # Ancien verrou orphelin, on le nettoie
     rm -f "$LOCK_FILE"
   fi
 fi
 
-# Création du verrou pour cette session
 echo $$ > "$LOCK_FILE"
-
-# Nettoyage automatique du verrou à la fermeture du script (peu importe la manière)
 trap "rm -f '$LOCK_FILE'" EXIT
 
 echo "=== Vérification de BedrockOnLinux ==="
@@ -75,15 +70,20 @@ else
   fi
 fi
 
+# --- Nettoyage global et agressif des verrous GPU dans tous les dossiers de l'app ---
+rm -rf ~/.config/bedrock-on-linux/*.lock ~/.cache/bedrock-on-linux/* ~/.local/share/bedrock-on-linux/*.lock 2>/dev/null
+find ~/.local/share/bedrock-on-linux -name "*lock*" -o -name "*interrupted*" -delete 2>/dev/null
+
 echo "=== Lancement du jeu ==="
 if command -v "$APP_CMD" &> /dev/null; then
-  # Tente de lancer le jeu, si le verrou GPU bloque, acquitte-le automatiquement et relance
+  # Tente un lancement normal propre
   "$APP_CMD" play
   EXIT_CODE=$?
+
+  # Si le lancement échoue, on tente une seconde fois avec le bypass de sécurité
   if [ $EXIT_CODE -ne 0 ]; then
-    echo "Détection d'un plantage graphique potentiel. Récupération automatique..."
-    "$APP_CMD" doctor --acknowledge-gpu-crash
-    "$APP_CMD" play
+    echo "Échec du lancement standard. Nouvelle tentative avec contournement..."
+    BOL_ALLOW_UNSAFE_GPU=1 "$APP_CMD" play
   fi
 elif [ -f ~/.local/bin/BedrockOnLinux.AppImage ]; then
   ~/.local/bin/BedrockOnLinux.AppImage
