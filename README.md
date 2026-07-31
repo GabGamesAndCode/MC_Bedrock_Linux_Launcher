@@ -1,4 +1,3 @@
-```markdown
 # MC Bedrock Linux Launcher (`mc-bedrock-launcher.sh`)
 
 A smart and automated Bash script to install, update, and launch **BedrockOnLinux** seamlessly.
@@ -18,14 +17,12 @@ A smart and automated Bash script to install, update, and launch **BedrockOnLinu
 2. Open a terminal in the script's directory and make it executable:
    ```bash
    chmod +x mc-bedrock-launcher.sh
-
-```
+   ```
 
 3. Run the script:
-```bash
-./mc-bedrock-launcher.sh
-
-```
+   ```bash
+   ./mc-bedrock-launcher.sh
+   ```
 
 
 
