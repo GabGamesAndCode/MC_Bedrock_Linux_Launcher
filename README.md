@@ -34,5 +34,3 @@ A smart and automated Bash script to install, update, and launch **BedrockOnLinu
 * `curl`
 * `wget`
 * `dpkg` (for Debian/Ubuntu/Mint-based systems)
-
-```
