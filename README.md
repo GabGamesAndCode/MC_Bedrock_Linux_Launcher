@@ -36,5 +36,3 @@ A smart and automated Bash script to install, update, and launch **BedrockOnLinu
 * `dpkg` (for Debian/Ubuntu/Mint-based systems)
 
 ```
-
-```
